@@ -2,6 +2,7 @@ import "./App.css";
 import app from "./firebase.init";
 import {
   getAuth,
+  GithubAuthProvider,
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
@@ -11,7 +12,8 @@ import { useState } from "react";
 const auth = getAuth(app);
 function App() {
   const [user, setUser] = useState({});
-  const provider = new GoogleAuthProvider();
+  const googleProvider = new GoogleAuthProvider();
+  const githubProvider = new GithubAuthProvider();
 
   const handleSingOut = () => {
     signOut(auth)
@@ -23,7 +25,18 @@ function App() {
       });
   };
   const handleSingIn = () => {
-    signInWithPopup(auth, provider)
+    signInWithPopup(auth, googleProvider)
+      .then((result) => {
+        const user = result.user;
+        setUser(user);
+        console.log(user);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  const handleGithubSingIn = () => {
+    signInWithPopup(auth, githubProvider)
       .then((result) => {
         const user = result.user;
         setUser(user);
@@ -35,10 +48,13 @@ function App() {
   };
   return (
     <div className="App">
-      {user.email ? (
+      {user.uid ? (
         <button onClick={handleSingOut}>Sing out</button>
       ) : (
-        <button onClick={handleSingIn}>Google sing in</button>
+        <>
+          <button onClick={handleSingIn}>Google sing in</button>
+          <button onClick={handleGithubSingIn}>Github Sing In</button>
+        </>
       )}
       <h2>Name: {user.displayName}</h2>
       <p>Email: {user.email}</p>
